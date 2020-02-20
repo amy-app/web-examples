@@ -77,15 +77,13 @@
                     } else if (bubble.data().moduleType === "OptionBubble") {
                         const optionBubbles = createElement("div", "OptionBubble", "");
                         for (const option of bubble.data().options) {
-                            let btn;
-
+                            let className = "";
                             if (bubble.data().correct === true && option.selected) {
-                                btn = createElement("button", "OptionCorrect", option.text);
+                                className = "OptionCorrect";
                             } else if (bubble.data().correct === false && option.selected) {
-                                btn = createElement("button", "OptionInCorrect", option.text);
-                            } else {
-                                btn = createElement("button", "", option.text);
+                                className = "OptionInCorrect";
                             }
+                            const btn = createElement("button", className, option.text);
 
                             // click handler for selected option
                             btn.onclick = () => {

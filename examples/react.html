@@ -15,6 +15,27 @@
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
+    <style>
+        .QuestionBubble {
+            background-color: #cacaff;
+        }
+
+        .FeedbackBubble {
+            background-color: #ffffb5;
+        }
+
+        .OptionBubble {
+        }
+
+        .OptionCorrect {
+            color: green;
+        }
+
+        .OptionInCorrect {
+            color: red;
+        }
+    </style>
+
     <!-- Load our React component. -->
     <script type="text/babel">
         "use strict";
@@ -68,17 +89,17 @@
         const QuestionBubble = props => {
             const { bubble } = props;
             return (
-                <div>
+                <div className={"QuestionBubble"}>
                     {bubble.data().text}
                     <br />
                 </div>
             );
         };
 
-        const FeedbackBubble = () => {
+        const FeedbackBubble = props => {
             const { bubble } = props;
             return (
-                <div>
+                <div className={"FeedbackBubble"}>
                     {bubble.data().text}
                     <br />
                 </div>
@@ -89,7 +110,25 @@
             const { bubble } = props;
             const returnElems = [];
             for (const option of bubble.data().options) {
-                returnElems.push(<button key={option.path}>{option.text}</button>);
+                let className = "";
+                if (bubble.data().correct === true && option.selected) {
+                    className = "OptionCorrect";
+                } else if (bubble.data().correct === false && option.selected) {
+                    className = "OptionInCorrect";
+                }
+
+                returnElems.push(
+                    <button
+                        className={className}
+                        key={option.path}
+                        onClick={() => {
+                            clickOption(option.path, bubble.id);
+                        }}
+                        disabled={bubble.data().selected}
+                    >
+                        {option.text}
+                    </button>,
+                );
             }
 
             return (
