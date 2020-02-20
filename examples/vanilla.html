@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<body>
+    <!-- Load firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>
+
+    <script src="./amy-helpers.js"></script>
+
+    <style>
+        .QuestionBubble {
+            background-color: #cacaff;
+        }
+
+        .FeedbackBubble {
+            background-color: #ffffb5;
+        }
+
+        .OptionBubble {
+        }
+
+        .OptionCorrect {
+            color: green;
+        }
+
+        .OptionInCorrect {
+            color: red;
+        }
+    </style>
+
+    <script>
+        function render(assignmentSnap, bubbleSnaps) {
+            // we need both data to render something
+            if (!assignmentSnap || !bubbleSnaps) {
+                return;
+            }
+
+            if (!assignmentSnap.exists) {
+                return;
+            }
+
+            if (!assignmentSnap.get("exercises") || assignmentSnap.get("exercises").length === 0) {
+                return;
+            }
+
+            if (bubbleSnaps.length === 0) {
+                return;
+            }
+
+            // --------------------------------------------------------
+            // at this point we know we have all data we need to render
+
+            // get first unfinished exercise ID
+            const unFinishedExercises = assignmentSnap.data().exercises.filter(ex => ex.state === "STARTED");
+
+            // write progress
+            document.getElementById("progress").innerHTML = `Progress: ${assignmentSnap.data().exercises.length -
+                unFinishedExercises.length}/${assignmentSnap.data().exercises.length}`;
+
+            const bubbleDiv = document.getElementById("bubbles");
+            if (unFinishedExercises.length > 0) {
+                const unFinishedExercise = unFinishedExercises[0];
+                const studentExerciseId = unFinishedExercise.studentExerciseId;
+                const bubbles = bubbleSnaps.docs.filter(bu => bu.data().studentExerciseId === studentExerciseId);
+                // go through all bubbles an renderthem on the screen
+
+                const htmlBubbleList = document.createElement("div");
+                for (const bubble of bubbles) {
+                    if (bubble.data().moduleType === "QuestionBubble") {
+                        // render Option bubble
+                        const question = createElement("div", "QuestionBubble", bubble.data().text);
+                        htmlBubbleList.append(question);
+                    } else if (bubble.data().moduleType === "FeedbackBubble") {
+                        // render Feedback Bubble
+                        const feedback = createElement("div", "FeedbackBubble", bubble.data().text);
+                        htmlBubbleList.append(feedback);
+                    } else if (bubble.data().moduleType === "OptionBubble") {
+                        const optionBubbles = createElement("div", "OptionBubble", "");
+                        for (const option of bubble.data().options) {
+                            let btn;
+
+                            if (bubble.data().correct === true && option.selected) {
+                                btn = createElement("button", "OptionCorrect", option.text);
+                            } else if (bubble.data().correct === false && option.selected) {
+                                btn = createElement("button", "OptionInCorrect", option.text);
+                            } else {
+                                btn = createElement("button", "", option.text);
+                            }
+
+                            // click handler for selected option
+                            btn.onclick = () => {
+                                clickOption(option.path, bubble.id);
+                            };
+
+                            btn.disabled = bubble.data().selected;
+                            optionBubbles.append(btn);
+                        }
+                        htmlBubbleList.append(optionBubbles);
+                    }
+                }
+                bubbleDiv.innerHTML = "";
+                bubbleDiv.append(htmlBubbleList);
+            } else {
+                bubbleDiv.innerHTML = "you have finished. Yeah!";
+            }
+        }
+
+        function createElement(type, className, innerHTML) {
+            const elem = document.createElement(type);
+            elem.className = className;
+            elem.innerHTML = innerHTML;
+            return elem;
+        }
+    </script>
+
+    <script>
+        function clickStart() {
+            console.log("start");
+            const token = document.getElementById("token").value;
+            const startArchetypIds = document
+                .getElementById("startArchetypIds")
+                .value.split(",")
+                .filter(e => !!e)
+                .map(e => e.trim());
+            // start an assignment with assignment options and token
+            startAssignment(
+                {
+                    startArchetypIds,
+                },
+                token,
+                render,
+            ).then(stopEvent => {
+                // run `stopEvent()` to stop all realtime listening
+                // this is usefull when you start a new assignment
+            });
+        }
+    </script>
+
+    <label for="token">Token:</label><br />
+    <input
+        type="text"
+        id="token"
+        name="token"
+        value="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTU4MjE5MzA5NywiZXhwIjoxNTgyMTk2Njk3LCJpc3MiOiJhbXktYWNAYXBwc3BvdC5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiYW15LWFjQGFwcHNwb3QuZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6InRlc3QxX3VzZXIxIiwiY2xhaW1zIjp7InNjaG9vbElkIjoidGVzdDEiLCJyb2xlIjoic3R1ZGVudCJ9fQ.hcnvBbAV-oCi4q6sj-oDxE7Xx2zMFwaLip4X2OR9pA_EDsNFiWIZrh2S-EIANjgplyTLgROBGzOu1a6T0_F1H3AVOOXQOkqKEFjmfkKv0jVo5Ebvx4xzx5QhS4XrnQ4BKAfEiMiF5LzSGWVrfPATt3uuxszHEicVfKXvYI8xMznq1RlVL9qJBPMAMyAGawbwkxWBsSR8Gsj_Igogd-yHLxl17Q-zYdT50BSrhsYGvmC-YChiYef3bbd5bueIk2vD6XC0FMcvr41g3sCot1f-7jNJA-t9DKMMhqVy1AwoZASAHJmc0iou3gxwnZr9Q2nbc2WejJ47jds_5Jl-pJf5dw"
+    /><br />
+    <label for="startArchetypIds">startArchetypIds:</label><br />
+    <input
+        type="text"
+        id="startArchetypIds"
+        name="startArchetypIds"
+        value="SUBTA00000100001000,PLUSA00000100001000"
+    /><br />
+    <input type="submit" value="Start Assignment" onclick="clickStart()" />
+
+    <div id="progress"></div>
+    <hr />
+    <div id="bubbles"></div>
+</body>

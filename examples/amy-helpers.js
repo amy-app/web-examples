@@ -84,6 +84,11 @@ async function startAssignment(assignmentOptions, token, onChange) {
     });
 }
 
+/**
+ * Tell AMY what option in what bubble was selecte
+ * @param {*} selectedPath The path is the "ID" of an option
+ * @param {*} bubbleId the ID on the bubble in which the option is
+ */
 function clickOption(selectedPath, bubbleId) {
     // set the path/option so AMY can update the data
     // and tell you if your selection was in/correct
