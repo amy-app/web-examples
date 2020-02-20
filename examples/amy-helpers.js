@@ -96,3 +96,28 @@ function clickOption(selectedPath, bubbleId) {
         selectedPath,
     });
 }
+
+/**
+ * Helper function that tests if an assignment exist and has bubbles
+ * @param {*} assignmentSnap
+ * @param {*} bubbleSnaps
+ */
+function isAssignmentLoaded(assignmentSnap, bubbleSnaps) {
+    if (!assignmentSnap || !bubbleSnaps) {
+        return false;
+    }
+
+    if (!assignmentSnap.exists) {
+        return false;
+    }
+
+    if (!assignmentSnap.get("exercises") || assignmentSnap.get("exercises").length === 0) {
+        return false;
+    }
+
+    if (bubbleSnaps.length === 0) {
+        return false;
+    }
+
+    return true;
+}

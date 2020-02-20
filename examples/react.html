@@ -1,0 +1,154 @@
+<body>
+    <div id="root"></div>
+
+    <!-- Load firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>
+
+    <!-- Load Amy helpers -->
+    <script src="./amy-helpers.js"></script>
+
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <!-- Load our React component. -->
+    <script type="text/babel">
+        "use strict";
+        const useState = React.useState;
+        const useEffect = React.useEffect;
+
+        const BubbleView = props => {
+            const { assignmentSnap, bubbleSnaps } = props;
+            if (!isAssignmentLoaded(assignmentSnap, bubbleSnaps)) {
+                return <div></div>;
+            }
+
+            const returnElems = [];
+
+            // get first unfinished exercise ID
+            const unFinishedExercises = assignmentSnap.data().exercises.filter(ex => ex.state === "STARTED");
+            if (unFinishedExercises.length > 0) {
+                const unFinishedExercise = unFinishedExercises[0];
+                const studentExerciseId = unFinishedExercise.studentExerciseId;
+                const bubbles = bubbleSnaps.docs.filter(bu => bu.data().studentExerciseId === studentExerciseId);
+                // go through all bubbles an renderthem on the screen
+
+                for (const bubble of bubbles) {
+                    if (bubble.data().moduleType === "QuestionBubble") {
+                        returnElems.push(<QuestionBubble key={bubble.id} bubble={bubble} />);
+                    } else if (bubble.data().moduleType === "FeedbackBubble") {
+                        returnElems.push(<FeedbackBubble key={bubble.id} bubble={bubble} />);
+                    } else if (bubble.data().moduleType === "OptionBubble") {
+                        returnElems.push(<OptionBubble key={bubble.id} bubble={bubble} />);
+                    }
+                }
+            } else {
+                returnElems.push("you have finished. Yeah!");
+            }
+
+            return <div>{returnElems}</div>;
+        };
+
+        const Progress = props => {
+            const { assignmentSnap, bubbleSnaps } = props;
+            if (!isAssignmentLoaded(assignmentSnap, bubbleSnaps)) {
+                return <div></div>;
+            }
+            const unFinishedExercises = assignmentSnap.data().exercises.filter(ex => ex.state === "STARTED");
+
+            return `Progress: ${assignmentSnap.data().exercises.length - unFinishedExercises.length}/${
+                assignmentSnap.data().exercises.length
+            }`;
+        };
+
+        const QuestionBubble = props => {
+            const { bubble } = props;
+            return (
+                <div>
+                    {bubble.data().text}
+                    <br />
+                </div>
+            );
+        };
+
+        const FeedbackBubble = () => {
+            const { bubble } = props;
+            return (
+                <div>
+                    {bubble.data().text}
+                    <br />
+                </div>
+            );
+        };
+
+        const OptionBubble = props => {
+            const { bubble } = props;
+            const returnElems = [];
+            for (const option of bubble.data().options) {
+                returnElems.push(<button key={option.path}>{option.text}</button>);
+            }
+
+            return (
+                <div>
+                    {returnElems}
+                    <br />
+                </div>
+            );
+        };
+
+        const Amy = () => {
+            const [token, setToken] = useState(
+                "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTU4MjE5NzE1OCwiZXhwIjoxNTgyMjAwNzU4LCJpc3MiOiJhbXktYWNAYXBwc3BvdC5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiYW15LWFjQGFwcHNwb3QuZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6InRlc3QxX3VzZXIyIiwiY2xhaW1zIjp7InNjaG9vbElkIjoidGVzdDEiLCJyb2xlIjoic3R1ZGVudCJ9fQ.f5PQIJ5a0H4XmOQurmfRJRcwT73GnqcEIYqwr3WjrgZiZltAU2I9Vk6ogLQ44tVJqD0EaBvrb_5IXu6DyDgwxT3OpSXiDXOpS7xnPingDBXsqxc4zOv8QLIUTTSTgBSJqONDz-IaNiXB3Wqxvk1WzqqJIfzz4iWUQ3hU2Sg91Q1xfm4C43SeSNGKCOfxJclodwYEcOu2lMmC3PL56ahzr58sO0edxkzmQkSqby-bFXleQQdDHFFf10vQmPya-l-S4niWgV-Htw3MSt7uzjz8lfmWhSyMJrd1Qz5hYr3YzeH_Rr2nOKs6jKYaba0_b8_pO5Xn2dajzb97hvZ7QMheCQ",
+            );
+
+            const [startArchetypIds, setStartArchetypIds] = useState("SUBTA00000100001000,PLUSA00000100001000");
+            const [start, setStart] = useState(0);
+            const [assignmentSnap, setAssignmentSnap] = useState();
+            const [bubbleSnaps, setBubbleSnaps] = useState();
+
+            useEffect(() => {
+                if (start !== 0) {
+                    const archIds = startArchetypIds
+                        .split(",")
+                        .filter(e => !!e)
+                        .map(e => e.trim());
+
+                    startAssignment(
+                        {
+                            startArchetypIds: archIds,
+                        },
+                        token,
+                        (aSnap, bSnap) => {
+                            setAssignmentSnap(aSnap);
+                            setBubbleSnaps(bSnap);
+                        },
+                    );
+                }
+            }, [start]);
+
+            return (
+                <React.Fragment>
+                    Token: <br />
+                    <input type="text" value={token} onChange={e => setToken(e.target.value)} />
+                    <br />
+                    startArchetypIds:
+                    <br />
+                    <input type="text" value={startArchetypIds} onChange={e => setStartArchetypIds(e.target.value)} />
+                    <br />
+                    <button onClick={() => setStart(Math.random())}>Start Assignment</button>
+                    <br />
+                    <Progress assignmentSnap={assignmentSnap} bubbleSnaps={bubbleSnaps} />
+                    <hr />
+                    <BubbleView assignmentSnap={assignmentSnap} bubbleSnaps={bubbleSnaps} />
+                </React.Fragment>
+            );
+        };
+
+        const domContainer = document.querySelector("#root");
+        ReactDOM.render(<Amy />, domContainer);
+    </script>
+</body>
