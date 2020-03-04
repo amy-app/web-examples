@@ -16,14 +16,13 @@ The return value will be a JSON looking like this
 ```
 {
     token: "long token string",
-    amy_user_id: "Jaipuna_juhu_user1",
+    amy_student_id: "Jaipuna_juhu_user1",
 }
 ```
 
 For fast testing you can use our example login data:
 
 ```
-oauth_consumer_key: test1
 api_key: testKey
 user_id: user123
 ```
