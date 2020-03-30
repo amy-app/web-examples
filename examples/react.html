@@ -142,21 +142,21 @@
         const Amy = () => {
             const [token, setToken] = useState("");
 
-            const [startArchetypIds, setStartArchetypIds] = useState("SUBTA00000100001000,PLUSA00000100001000");
+            const [startArchetypeIds, setstartArchetypeIds] = useState("SUBTA00000100001000,PLUSA00000100001000");
             const [start, setStart] = useState(0);
             const [assignmentSnap, setAssignmentSnap] = useState();
             const [bubbleSnaps, setBubbleSnaps] = useState();
 
             useEffect(() => {
                 if (start !== 0) {
-                    const archIds = startArchetypIds
+                    const archIds = startArchetypeIds
                         .split(",")
                         .filter(e => !!e)
                         .map(e => e.trim());
 
                     startAssignment(
                         {
-                            startArchetypIds: archIds,
+                            startArchetypeIds: archIds,
                         },
                         token,
                         (aSnap, bSnap) => {
@@ -172,9 +172,9 @@
                     Token: <br />
                     <input type="text" value={token} onChange={e => setToken(e.target.value)} />
                     <br />
-                    startArchetypIds:
+                    startArchetypeIds:
                     <br />
-                    <input type="text" value={startArchetypIds} onChange={e => setStartArchetypIds(e.target.value)} />
+                    <input type="text" value={startArchetypeIds} onChange={e => setstartArchetypeIds(e.target.value)} />
                     <br />
                     <button onClick={() => setStart(Math.random())}>Start Assignment</button>
                     <br />

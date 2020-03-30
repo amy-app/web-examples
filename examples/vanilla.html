@@ -115,15 +115,15 @@
         function clickStart() {
             console.log("start");
             const token = document.getElementById("token").value;
-            const startArchetypIds = document
-                .getElementById("startArchetypIds")
+            const startArchetypeIds = document
+                .getElementById("startArchetypeIds")
                 .value.split(",")
                 .filter(e => !!e)
                 .map(e => e.trim());
             // start an assignment with assignment options and token
             startAssignment(
                 {
-                    startArchetypIds,
+                    startArchetypeIds,
                 },
                 token,
                 render,
@@ -136,11 +136,11 @@
 
     <label for="token">Token:</label><br />
     <input type="text" id="token" name="token" /><br />
-    <label for="startArchetypIds">startArchetypIds:</label><br />
+    <label for="startArchetypeIds">startArchetypeIds:</label><br />
     <input
         type="text"
-        id="startArchetypIds"
-        name="startArchetypIds"
+        id="startArchetypeIds"
+        name="startArchetypeIds"
         value="SUBTA00000100001000,PLUSA00000100001000"
     /><br />
     <input type="submit" value="Start Assignment" onclick="clickStart()" />
