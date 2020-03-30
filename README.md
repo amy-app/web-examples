@@ -4,6 +4,10 @@ Example implementation of the AMY UI by using the AMY.APP API
 
 ![Simple Amy UI image](images/simpleAmy.png)
 
+## Test directly here on GitHub
+- React implementation https://amy-app.github.io/web-examples/examples/react.html
+- Vanilla JS implementation https://amy-app.github.io/web-examples/examples/vanilla.html
+
 ## Start webserver
 
 To start the example project all you need to do is run a local webserver in the `examples` folder. For example: `npx serve`. This will serve your local project on port `5000`. Now you can open the example page via http://localhost:5000/vanilla or http://localhost:5000/react
