@@ -1,191 +1,225 @@
 <body>
-    <div id="root"></div>
+  <div id="root"></div>
 
-    <!-- Load firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>
+  <!-- Load firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>
 
-    <!-- Load Amy helpers -->
-    <script src="./amy-helpers.js"></script>
+  <!-- Load Amy helpers -->
+  <script src="./amy-helpers.js"></script>
 
-    <!-- Load React. -->
-    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <!-- Load React. -->
+  <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+  <script
+    src="https://unpkg.com/react@16/umd/react.development.js"
+    crossorigin
+  ></script>
+  <script
+    src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    crossorigin
+  ></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
-    <style>
-        .QuestionBubble {
-            background-color: #cacaff;
-        }
+  <style>
+    .QuestionBubble {
+      background-color: #cacaff;
+    }
 
-        .FeedbackBubble {
-            background-color: #ffffb5;
-        }
+    .FeedbackBubble {
+      background-color: #ffffb5;
+    }
 
-        .OptionBubble {
-        }
+    .OptionBubble {
+    }
 
-        .OptionCorrect {
-            color: green;
-        }
+    .OptionCorrect {
+      color: green;
+    }
 
-        .OptionInCorrect {
-            color: red;
-        }
-    </style>
+    .OptionInCorrect {
+      color: red;
+    }
+  </style>
 
-    <!-- Load our React component. -->
-    <script type="text/babel">
-        "use strict";
-        const useState = React.useState;
-        const useEffect = React.useEffect;
+  <!-- Load our React component. -->
+  <script type="text/babel">
+    "use strict";
+    const useState = React.useState;
+    const useEffect = React.useEffect;
 
-        const BubbleView = props => {
-            const { assignmentSnap, bubbleSnaps } = props;
-            if (!isAssignmentLoaded(assignmentSnap, bubbleSnaps)) {
-                return <div></div>;
-            }
+    const BubbleView = props => {
+      const { assignmentSnap, bubbleSnaps } = props;
+      if (!isAssignmentLoaded(assignmentSnap, bubbleSnaps)) {
+        return <div></div>;
+      }
 
-            const returnElems = [];
+      const returnElems = [];
 
-            // get first unfinished exercise ID
-            const unFinishedExercises = assignmentSnap.data().exercises.filter(ex => ex.state === "STARTED");
-            if (unFinishedExercises.length > 0) {
-                const unFinishedExercise = unFinishedExercises[0];
-                const studentExerciseId = unFinishedExercise.studentExerciseId;
-                const bubbles = bubbleSnaps.docs.filter(bu => bu.data().studentExerciseId === studentExerciseId);
-                // go through all bubbles an renderthem on the screen
+      // get first unfinished exercise ID
+      const unFinishedExercises = assignmentSnap
+        .data()
+        .exercises.filter(ex => ex.state === "STARTED");
+      if (unFinishedExercises.length > 0) {
+        const unFinishedExercise = unFinishedExercises[0];
+        const studentExerciseId = unFinishedExercise.studentExerciseId;
+        const bubbles = bubbleSnaps.docs.filter(
+          bu => bu.data().studentExerciseId === studentExerciseId
+        );
+        // go through all bubbles an renderthem on the screen
 
-                for (const bubble of bubbles) {
-                    if (bubble.data().moduleType === "QuestionBubble") {
-                        returnElems.push(<QuestionBubble key={bubble.id} bubble={bubble} />);
-                    } else if (bubble.data().moduleType === "FeedbackBubble") {
-                        returnElems.push(<FeedbackBubble key={bubble.id} bubble={bubble} />);
-                    } else if (bubble.data().moduleType === "OptionBubble") {
-                        returnElems.push(<OptionBubble key={bubble.id} bubble={bubble} />);
-                    }
-                }
-            } else {
-                returnElems.push("you have finished. Yeah!");
-            }
-
-            return <div>{returnElems}</div>;
-        };
-
-        const Progress = props => {
-            const { assignmentSnap, bubbleSnaps } = props;
-            if (!isAssignmentLoaded(assignmentSnap, bubbleSnaps)) {
-                return <div></div>;
-            }
-            const unFinishedExercises = assignmentSnap.data().exercises.filter(ex => ex.state === "STARTED");
-
-            return `Progress: ${assignmentSnap.data().exercises.length - unFinishedExercises.length}/${
-                assignmentSnap.data().exercises.length
-            }`;
-        };
-
-        const QuestionBubble = props => {
-            const { bubble } = props;
-            return (
-                <div className={"QuestionBubble"}>
-                    {bubble.data().text}
-                    <br />
-                </div>
+        for (const bubble of bubbles) {
+          if (bubble.data().moduleType === "QuestionBubble") {
+            returnElems.push(
+              <QuestionBubble key={bubble.id} bubble={bubble} />
             );
-        };
-
-        const FeedbackBubble = props => {
-            const { bubble } = props;
-            return (
-                <div className={"FeedbackBubble"}>
-                    {bubble.data().text}
-                    <br />
-                </div>
+          } else if (bubble.data().moduleType === "FeedbackBubble") {
+            returnElems.push(
+              <FeedbackBubble key={bubble.id} bubble={bubble} />
             );
-        };
+          } else if (bubble.data().moduleType === "OptionBubble") {
+            returnElems.push(<OptionBubble key={bubble.id} bubble={bubble} />);
+          }
+        }
+      } else {
+        returnElems.push("you have finished. Yeah!");
+      }
 
-        const OptionBubble = props => {
-            const { bubble } = props;
-            const returnElems = [];
-            for (const option of bubble.data().options) {
-                let className = "";
-                if (bubble.data().correct === true && option.selected) {
-                    className = "OptionCorrect";
-                } else if (bubble.data().correct === false && option.selected) {
-                    className = "OptionInCorrect";
-                }
+      return <div>{returnElems}</div>;
+    };
 
-                returnElems.push(
-                    <button
-                        className={className}
-                        key={option.path}
-                        onClick={() => {
-                            clickOption(option.path, bubble.id);
-                        }}
-                        disabled={bubble.data().selected}
-                    >
-                        {option.text}
-                    </button>,
-                );
-            }
+    const Progress = props => {
+      const { assignmentSnap, bubbleSnaps } = props;
+      if (!isAssignmentLoaded(assignmentSnap, bubbleSnaps)) {
+        return <div></div>;
+      }
+      const unFinishedExercises = assignmentSnap
+        .data()
+        .exercises.filter(ex => ex.state === "STARTED");
 
-            return (
-                <div>
-                    {returnElems}
-                    <br />
-                </div>
-            );
-        };
+      return `Progress: ${assignmentSnap.data().exercises.length -
+        unFinishedExercises.length}/${assignmentSnap.data().exercises.length}`;
+    };
 
-        const Amy = () => {
-            const [token, setToken] = useState("");
+    const QuestionBubble = props => {
+      const { bubble } = props;
+      return (
+        <div className={"QuestionBubble"}>
+          {bubble.data().text}
+          <br />
+        </div>
+      );
+    };
 
-            const [startArchetypeIds, setstartArchetypeIds] = useState("SUBTA00000100001000,PLUSA00000100001000");
-            const [start, setStart] = useState(0);
-            const [assignmentSnap, setAssignmentSnap] = useState();
-            const [bubbleSnaps, setBubbleSnaps] = useState();
+    const FeedbackBubble = props => {
+      const { bubble } = props;
+      return (
+        <div className={"FeedbackBubble"}>
+          {bubble.data().text}
+          <br />
+        </div>
+      );
+    };
 
-            useEffect(() => {
-                if (start !== 0) {
-                    const archIds = startArchetypeIds
-                        .split(",")
-                        .filter(e => !!e)
-                        .map(e => e.trim());
+    const OptionBubble = props => {
+      const { bubble } = props;
+      const {selectedPath} = bubble.data();
+      const returnElems = [];
+      for (const option of bubble.data().options) {
+        let className = "";
+        if (bubble.data().correct === true && option.path === selectedPath) {
+          className = "OptionCorrect";
+        } else if (bubble.data().correct === false && option.path === selectedPath) {
+          className = "OptionInCorrect";
+        }
 
-                    startAssignment(
-                        {
-                            startArchetypeIds: archIds,
-                        },
-                        token,
-                        (aSnap, bSnap) => {
-                            setAssignmentSnap(aSnap);
-                            setBubbleSnaps(bSnap);
-                        },
-                    );
-                }
-            }, [start]);
+        returnElems.push(
+          <button
+            className={className}
+            key={option.path}
+            onClick={() => {
+              clickOption(option.path, bubble.id);
+            }}
+            disabled={bubble.data().selected}
+          >
+            {option.text}
+          </button>
+        );
+      }
 
-            return (
-                <React.Fragment>
-                    Token: <br />
-                    <input type="text" value={token} onChange={e => setToken(e.target.value)} />
-                    <br />
-                    startArchetypeIds:
-                    <br />
-                    <input type="text" value={startArchetypeIds} onChange={e => setstartArchetypeIds(e.target.value)} />
-                    <br />
-                    <button onClick={() => setStart(Math.random())}>Start Assignment</button>
-                    <br />
-                    <Progress assignmentSnap={assignmentSnap} bubbleSnaps={bubbleSnaps} />
-                    <hr />
-                    <BubbleView assignmentSnap={assignmentSnap} bubbleSnaps={bubbleSnaps} />
-                </React.Fragment>
-            );
-        };
+      return (
+        <div>
+          {returnElems}
+          <br />
+        </div>
+      );
+    };
 
-        const domContainer = document.querySelector("#root");
-        ReactDOM.render(<Amy />, domContainer);
-    </script>
+    const Amy = () => {
+      const [token, setToken] = useState("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTU4NjcxNjQwMSwiZXhwIjoxNTg2NzIwMDAxLCJpc3MiOiJhbXktYWNAYXBwc3BvdC5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiYW15LWFjQGFwcHNwb3QuZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6IkphaXB1bmFfZGVtbzFfZGVtb1VzZXIxIiwiY2xhaW1zIjp7InNjaG9vbElkIjoiSmFpcHVuYV9kZW1vMSIsInJvbGUiOiJzdHVkZW50In19.E0Vxe-7yXIZtboP-cjNenYh0UO50BG9LGAwVDMlM77ybMLoy05BCu6VbE12RNBLMugh4dgCTNShTN9UlS-N7ak8AVxllHp5nOF7zKs74CAVcg6y5X_dYh84FxUaOKuWJzmzV0bwNjPGqWIDjaSTH77KffJT_doOAfkg1OwHCVkCZ_6ILvhgTp3CjOdDOGCiP9epWU6tEF2FyYqmp8rimGS7Qu1alXeigjbtOvUFGGmSE-NlJW1Rb6GU3ib23BFQcjfA0oN-Q292IVsjLe96ey8FuKStgQtYLyp7DslzSZxqiIf7H2VyUMpch9HpkDqa4KGVUIgqnFZlesx6gpVNTyA");
+      const [assignmentId, setAssignmentId] = useState("Jaipuna_demo1_demoUser1_w3JgW2eDo46Lmdf9VAMs");
+      const [uid, setUid] = useState("");
+      const [start, setStart] = useState(0);
+      const [assignmentSnap, setAssignmentSnap] = useState();
+      const [bubbleSnaps, setBubbleSnaps] = useState();
+
+
+      useEffect(() => {
+        if (start !== 0 && uid && assignmentId) {
+          loadAssignment(assignmentId, uid, (aSnap, bSnap) => {
+            setAssignmentSnap(aSnap);
+            setBubbleSnaps(bSnap);
+          });
+        }
+      }, [start]);
+
+
+      const login = () => {
+        console.log("login");
+
+        authViaToken(token)
+          .then(e => {
+            console.log("logged in", e);
+            setUid(e.user.uid);
+          })
+          .catch(e => {
+            console.error("loging failed");
+            setUid("");
+          });
+      };
+
+      return (
+        <React.Fragment>
+          Token: <br />
+          <input
+            type="text"
+            value={token}
+            onChange={e => setToken(e.target.value)}
+          />
+          <button onClick={() => login()}>Login</button>[UID = {uid}]
+          <br />
+          AssignmentId:
+          <br />
+          <input
+            type="text"
+            value={assignmentId}
+            onChange={e => setAssignmentId(e.target.value)}
+          />
+          <button onClick={() => setStart(Math.random())}>
+            Start Assignment
+          </button>
+          <br />
+          <Progress assignmentSnap={assignmentSnap} bubbleSnaps={bubbleSnaps} />
+          <hr />
+          <BubbleView
+            assignmentSnap={assignmentSnap}
+            bubbleSnaps={bubbleSnaps}
+          />
+        </React.Fragment>
+      );
+    };
+
+    const domContainer = document.querySelector("#root");
+    ReactDOM.render(<Amy />, domContainer);
+  </script>
 </body>

@@ -21,23 +21,22 @@ async function authViaToken(token) {
     return app.auth().signInWithCustomToken(token);
 }
 
+
+
 /**
- * Creates an assignment based on assignment options
- * @param assignmentOptions assignment config object
+ * Listen to an assignment belonging to a student (the assignment was made via the `/v2.0/amy/create-student-assignment` api)
+ * @param {*} assignmentId the assignment Id returned by the api
+ * @param {*} studentId the userId returned when `/v2.0/auth/create-student-token` or `create-student` was called
  * @param onChange onChange(assignmentSnap, bubblesSnap) function that is called when the assignemtn or bubble changes
  * @return callback that stops the firebase realtime listners
  */
-function createAssignment(assignmentOptions, onChange) {
+function loadAssignment(assignmentId, studentId, onChange) {
     // Assignemnt and Bubble snaps for current assignment
     let assignmentSnap;
     let bubbleSnaps;
 
     // generate random assignmentId
-    const assignmentReference = assignmentCollection.doc();
-    const assignmentId = assignmentReference.id;
-
-    // create assignment
-    assignmentReference.set(assignmentOptions);
+    const assignmentReference = assignmentCollection.doc(assignmentId);
 
     // listen to assignment changes
     const stopAssignment = assignmentReference.onSnapshot(_assignmentSnap => {
@@ -49,7 +48,7 @@ function createAssignment(assignmentOptions, onChange) {
     const stopBubbles = bubbleCollection
         .orderBy("createdAt", "asc")
         .where("studentAssignmentId", "==", assignmentId)
-        .where("studentId", "==", assignmentOptions.studentId)
+        .where("studentId", "==", studentId)
         .onSnapshot(_bubbleSnaps => {
             bubbleSnaps = _bubbleSnaps;
             onChange(assignmentSnap, bubbleSnaps);
@@ -61,28 +60,6 @@ function createAssignment(assignmentOptions, onChange) {
     };
 }
 
-/**
- * Creates an assignment based on assignment options
- * @param assignmentOptions assignment config object
- * @param onChange onChange(assignmentSnap, bubblesSnap) function that is called when the assignemtn or bubble changes
- * @return callback that stops the firebase realtime listners
- */
-
-/**
- * Creates an assignment based on assignment options and token
- *
- *
- * @param {*} assignmentOptions assignment config object
- * @param {*} token firebase token
- * @param {*} onChange onChange(assignmentSnap, bubblesSnap) function that is called when the assignemtn or bubble changes
- * @return Promise<stopEvent> Calling the stopEvent() will stop all listeners
- */
-async function startAssignment(assignmentOptions, token, onChange) {
-    return authViaToken(token).then(student => {
-        const studentId = student.user.uid;
-        return createAssignment({ ...assignmentOptions, studentId }, onChange);
-    });
-}
 
 /**
  * Tell AMY what option in what bubble was selecte
