@@ -1,7 +1,12 @@
 // ----------------- FIREBASE CONFIG ---------------
 const firebaseConfig = {
     apiKey: "AIzaSyC9ttADyEm-cfPb__joYv3MgBGjWOkxwMc",
+    authDomain: "amy--app.firebaseapp.com",
+    databaseURL: "https://amy--app.firebaseio.com",
     projectId: "amy--app",
+    storageBucket: "amy--app.appspot.com",
+    messagingSenderId: "344535742053",
+    appId: "1:344535742053:web:a3298943d3d6171f0af88c"
 };
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig, "AMY");
