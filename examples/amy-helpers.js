@@ -1,7 +1,7 @@
 // ----------------- FIREBASE CONFIG ---------------
 const firebaseConfig = {
-    apiKey: "AIzaSyDJ20dFy6oeNt3uF_URIBD5lllZs-l0b6o",
-    projectId: "amy-ac",
+    apiKey: "AIzaSyC9ttADyEm-cfPb__joYv3MgBGjWOkxwMc",
+    projectId: "amy--app",
 };
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig, "AMY");
